@@ -16,7 +16,7 @@ Before running this tool, ensure you have the following items:
 1. **Clone the repository and navigate to the directory:**
    ```bash
    git clone https://github.com/Zyuan04/website-qc-ai.git
-   cd auto-qc-tool
+   cd website-qc-ai.git
    ```
 
 2. **Install dependencies:**
