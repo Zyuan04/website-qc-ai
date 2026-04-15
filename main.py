@@ -16,25 +16,20 @@ import io
 # --- 1. CONFIGURATION ---
 # ==========================================
 
-# Sitemap Settings
 USE_URL = False  # Set to False to use the local file
 SITEMAP_URL = "https://example.com.my/sitemap.xml" 
-SITEMAP_FILE = "AseanGems_Sitemap.xml"
+SITEMAP_FILE = "data/Example_Sitemap.xml"
 
 # Google Sheets Settings
-GOOGLE_SHEET_TAB_NAME = "CountryView" # Matches your exact tab name in Google Sheets
+GOOGLE_SHEET_TAB_NAME = "WebsiteName" # Matches your exact tab name in Google Sheets
 
-# AI Model Settings (Free Tier and Support Vision Models)
-# gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3-flash-preview, gemini-3.1-flash-lite-preview
+# AI Model Settings (Free Tier and Support Vision Models) - gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3-flash-preview, gemini-3.1-flash-lite-preview
 GEMINI_MODEL = "gemini-3.1-flash-lite-preview"
 COOLDOWN_SECONDS = 15 # Seconds to wait between pages to respect API limits
 
-
-# Local Storage Settings
 SAVE_LOCAL_SCREENSHOTS = True # Set to False for "No-Trace" runs (to save storage/time)
 SCREENSHOT_DIR = "audit_screenshots"
 
-# Browser Settings
 VIEWPORT_WIDTH = 1920
 VIEWPORT_HEIGHT = 1080
 
@@ -71,13 +66,11 @@ def update_sheet(row_data):
 def check_needs_header():
     """Checks if the Google Sheet is empty to prevent duplicate headers."""
     try:
-        # We only need to check the very first cell (A1)
         result = service.spreadsheets().values().get(
             spreadsheetId=SPREADSHEET_ID,
             range=f"{GOOGLE_SHEET_TAB_NAME}!A1:A1" 
         ).execute()
         
-        # If 'values' doesn't exist in the result, the cell is empty
         return not result.get('values') 
     except Exception as e:
         print(f"Header Check Error: {e}")
@@ -208,7 +201,6 @@ def run_audit():
         )
         page = context.new_page()
         
-        # Only write the header row if the sheet is completely empty
         if check_needs_header():
             print("Sheet is empty. Writing header row...")
             update_sheet(["Page Name", "URL", "Issues", "Suggestions", "Timestamp"])
@@ -216,15 +208,11 @@ def run_audit():
         for url in pending_urls:
             print(f"\nAuditing: {url}")
             try:
-                # ==========================================
-                # PHASE 1: INITIAL LOAD & CLOUDFLARE BYPASS
-                # ==========================================
                 try:
                     page.goto(url, wait_until="domcontentloaded", timeout=60000) 
                 except Exception as load_err:
                     print(f"Warning: Page load hung up, but attempting to proceed... ({load_err})")
 
-                # The Cloudflare Bouncer: Wait for challenge screens to automatically resolve
                 for _ in range(15):
                     current_title = page.title().lower()
                     if "moment" in current_title or "cloudflare" in current_title or "attention required" in current_title:
@@ -237,9 +225,6 @@ def run_audit():
                 if not page_name or "moment" in page_name.lower():
                     page_name = "Unknown Page (Or Blocked)"
 
-                # ==========================================
-                # PHASE 2: DEEP SCROLL & ASSET LOADING
-                # ==========================================
                 print("Deep scrolling and forcing lazy-loaded Elementor/JetEngine assets...")
                 page.evaluate("""
                     async () => {
@@ -302,16 +287,11 @@ def run_audit():
                     }
                 """)
 
-                # ==========================================
-                # PHASE 3: NETWORK SETTLEMENT
-                # ==========================================
-                # Wait for JetEngine's AJAX network traffic to stop
                 try:
                     page.wait_for_load_state("networkidle", timeout=12000)
                 except:
                     print("Network didn't fully idle. Moving to final UI settlement...")
 
-                # Final pause for grids to populate
                 page.wait_for_timeout(3000)
 
                 print("Returning to top of page to reset sticky headers...")
@@ -323,9 +303,6 @@ def run_audit():
 
                 page.wait_for_timeout(2000)
 
-                # ==========================================
-                # PHASE 4: DOM PREP, WIDTH FIX & EXTRACTION
-                # ==========================================
                 print("Preparing DOM: Injecting global width fixes and extracting AI text...")
                 clean_dom = page.evaluate("""() => {
                     // 1. Hide common annoying widgets completely (Live chat, Cookie popups, floating WhatsApp buttons)
@@ -355,9 +332,6 @@ def run_audit():
                     return `--- INTERACTIVE ELEMENTS (LINKS/BUTTONS) ---\\n${interactiveElements}\\n\\n--- VISIBLE PAGE TEXT ---\\n${visibleText}`;
                 }""")
 
-                # ==========================================
-                # PHASE 5: THE PERFECT SCREENSHOT
-                # ==========================================
                 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
                 safe_filename = url.replace("https://", "").replace("http://", "")
                 for char in ['/', '\\', '?', '%', '*', ':', '|', '"', '<', '>', '=', '&']:
@@ -368,7 +342,6 @@ def run_audit():
                 body_locator = page.locator("body")
 
                 if SAVE_LOCAL_SCREENSHOTS:
-                    # Taking a screenshot of an element automatically captures its full height and width
                     screenshot_bytes = body_locator.screenshot(path=save_path)
                     print(f"📸 Saved targeted body screenshot to: {save_path}")
                 else:
@@ -619,13 +592,11 @@ def run_audit():
 
             except Exception as e:
                 error_msg = str(e)
-                # Check if the error is a 429 API Limit / Quota error
                 if "429" in error_msg or "RESOURCE_EXHAUSTED" in error_msg or "quota" in error_msg.lower():
                     print("\n")
                     print("🚨 CRITICAL: Gemini API Limit Reached! Stopping audit.")
                     break
                 
-                # For all other random errors (like a timeout or bad URL), log normally
                 print(f"Error on {url}: {e}")
                 update_sheet([page_name if 'page_name' in locals() else "Unknown", url, "🔴 System Error", str(e), time.ctime()])
             
