@@ -8,8 +8,8 @@ Auto QC is an automated quality control script designed to crawl website sitemap
 ## ⚙️Prerequisites
 Before running this tool, ensure you have the following items:
 * Python 3.8+ installed
-* Google Cloud Console account (for Google Sheets API Service Account)
-* Gemini API Key
+* Google Cloud Console account (Google Sheets API Service Account - "https://console.cloud.google.com/")
+* Gemini API Key (Google AI Studio - "https://aistudio.google.com/")
 
 ## 🚀Setup & Installation
 
@@ -40,10 +40,14 @@ Before running an audit, open main.py and adjust the variables in the --- 1. CON
 * **USE_URL:** Set to True to scan a live sitemap, or False to use a local XML file.
 
 * **SITEMAP_URL / SITEMAP_FILE:** The target sitemap location.
+* To get SITEMAP_FILE: Use plugin to export sitemap file (.xml) or use online sitemap generator "www.xml-sitemaps.com".
 
 * **GOOGLE_SHEET_TAB_NAME:** The exact name of the tab in your target Google Sheet.
 
 * **SAVE_LOCAL_SCREENSHOTS:** Set to False if you want a "No-Trace" run to save local storage space.
+
+* **GEMINI_MODEL:** Free Tier and Support Vision Models - gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3-flash-preview, gemini-3.1-flash-lite-preview.
+* Check "https://ai.google.dev/gemini-api/docs/models" for updated models.
 
 ## 💻Usage
 Run the script via the terminal:
