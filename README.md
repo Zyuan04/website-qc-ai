@@ -39,15 +39,15 @@ Before running an audit, open main.py and adjust the variables in the --- 1. CON
 
 * **USE_URL:** Set to True to scan a live sitemap, or False to use a local XML file.
 
-* **SITEMAP_URL / SITEMAP_FILE:** The target sitemap location.
-* To get SITEMAP_FILE: Use plugin to export sitemap file (.xml) or use online sitemap generator "www.xml-sitemaps.com".
+* **SITEMAP_URL / SITEMAP_FILE:** The target sitemap location.  
+To get SITEMAP_FILE: Use plugin to export sitemap file (.xml) or use online sitemap generator "www.xml-sitemaps.com".
 
 * **GOOGLE_SHEET_TAB_NAME:** The exact name of the tab in your target Google Sheet.
 
 * **SAVE_LOCAL_SCREENSHOTS:** Set to False if you want a "No-Trace" run to save local storage space.
 
-* **GEMINI_MODEL:** Free Tier and Support Vision Models - gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3-flash-preview, gemini-3.1-flash-lite-preview.
-* Check "https://ai.google.dev/gemini-api/docs/models" for updated models.
+* **GEMINI_MODEL:** Free Tier and Support Vision Models - gemini-2.5-flash, gemini-2.5-flash-lite, gemini-3-flash-preview, gemini-3.1-flash-lite-preview (16/04/2026).  
+Check updated models here: "https://ai.google.dev/gemini-api/docs/models".
 
 ## 💻Usage
 Run the script via the terminal:
